@@ -1,0 +1,68 @@
+# --- secrets -------------------------------------------------------------
+# .env* catches .env.local, .env.production etc. The example file is the one
+# thing here that must stay tracked.
+.env
+.env.*
+!.env.example
+
+# Streamlit reads this automatically and it is exactly where a DB password
+# would end up. Config belongs in Settings; this file should never exist,
+# and must never be committed if it does.
+.streamlit/secrets.toml
+
+*.pem
+*.key
+credentials.json
+
+# --- scraped data --------------------------------------------------------
+# Raw page cache (CACHE_DIR). Large, regenerable, and full of third-party
+# page content that has no business in the repo.
+.cache/
+data/
+
+# Database dumps
+*.sql.gz
+*.dump
+*.bak
+
+# --- python --------------------------------------------------------------
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+.tox/
+.nox/
+
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# --- playwright ----------------------------------------------------------
+test-results/
+playwright-report/
+
+# --- tooling -------------------------------------------------------------
+# Personal permission overrides. The shared .claude/agents and
+# .claude/skills are deliberately tracked; this file is per-machine.
+.claude/settings.local.json
+.ai/
+
+*.log
+
+# --- editors and OS ------------------------------------------------------
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini

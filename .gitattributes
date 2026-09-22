@@ -1,0 +1,9 @@
+# Normalize line endings in source. Without this, Git's autocrlf on Windows
+# rewrites checked-out files and every sha256 over file content changes.
+* text=auto eol=lf
+
+# Recorded fixtures are hashed byte-for-byte. Git must not touch them at all,
+# or the cache keys and content_hash tests break on checkout.
+tests/fixtures/** -text
+*.json -text
+*.html -text
