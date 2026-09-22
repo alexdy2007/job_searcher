@@ -14,6 +14,7 @@ README is tracked so the format is documented.
 | `timestamp_utc` | When the subagent finished |
 | `agent_type` | Which subagent (also the filename) |
 | `agent_id`, `session_id` | For tracing back to a transcript |
+| `task` | First ≤100 chars of the prompt the subagent was given, whitespace collapsed |
 | `model` | Dated model id as recorded, e.g. `claude-haiku-4-5-20251001` |
 | `api_calls` | Distinct API responses, deduped by message id |
 | `input_tokens`, `output_tokens` | Fresh (uncached) tokens |
@@ -29,13 +30,24 @@ magnitude — most of a subagent's tokens are its cached system prompt.
 `cost_usd` is left **empty**, not `0.00`, for a model the policy does not
 price. A zero would read as "this run was free".
 
-## Two things worth knowing
+## Three things worth knowing
 
-**Dedup is what makes the numbers real.** One API response can occupy several
-transcript lines — separate content blocks sharing a `message.id`, each
-repeating the same aggregate usage block. Summing every assistant line
-roughly doubles every figure. The script dedups by `message.id`; verified
-against the harness's own reported `subagent_tokens`, which matches exactly.
+**Dedup is what makes the numbers real, and last occurrence wins.** One API
+response occupies several transcript lines — separate content blocks sharing
+a `message.id`. Summing every assistant line roughly doubles every figure.
+But those lines do **not** always repeat the same usage block: a response can
+appear first with a partial count and again with the completed one (observed
+in a real transcript as `output_tokens` 1, then 150 for the same id). So the
+script keeps the *last* entry per `message.id`. Keeping the first undercounts
+output — it reported 117 output tokens for a run whose real figure was 266.
+
+**These totals are cumulative spend, not context size.** They are not the
+same as the `subagent_tokens` the Claude Code UI reports for a run. That
+figure is the context size of the *final* call; this is the sum over every
+call, which is what gets billed — each call re-sends the conversation and
+pays to read the cache again. On a two-call run the two measures were 27,981
+and 53,556. They coincide only when an agent makes exactly one call, so a
+single-call run cannot be used to validate this.
 
 **This covers subagents only.** Work done on the main thread has no
 `SubagentStop` event and is not recorded here. To make a task show up in
