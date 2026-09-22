@@ -20,7 +20,17 @@ _SessionFactory: sessionmaker[Session] | None = None
 def get_engine() -> Engine:
     global _engine
     if _engine is None:
-        _engine = create_engine(settings.database_url, pool_pre_ping=True, future=True)
+        _engine = create_engine(
+            settings.database_url,
+            pool_pre_ping=True,
+            future=True,
+            # Without an explicit timeout, connecting to a host that is not
+            # listening blocks for minutes on Windows rather than failing.
+            # That turns "Postgres isn't running" into an app that appears to
+            # hang, in the UI and in the CLI alike, instead of one that says
+            # so. Five seconds is far longer than a healthy local connect.
+            connect_args={"connect_timeout": 5},
+        )
     return _engine
 
 
