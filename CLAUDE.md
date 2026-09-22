@@ -12,7 +12,8 @@ the default (most expensive) model.
 
 | The task involves | Use | Runs on |
 |---|---|---|
-| Adding a company, finding a careers page or board token, classifying a site's ATS | `source-onboarder` | sonnet |
+| Discovering *which* companies to add — searching the web for UK data-domain employers and verifying their boards | `uk-data-scout` | sonnet |
+| Adding a *named* company, finding a careers page or board token, classifying a site's ATS | `source-onboarder` | sonnet |
 | A source that failed, returned zero jobs, or is flagged `suspect_drift` | `adapter-doctor` | sonnet |
 | Any edit to `db/models.py`, or writing/applying an Alembic migration | `schema-migrator` | opus |
 | Extraction prompt, Pydantic schema, enrichment quality, or model/effort choices | `extraction-tuner` | opus |

@@ -109,6 +109,16 @@ rationale = "Prompt and schema judgement; the thing every runtime cost decision 
 tier = "standard"
 rationale = "Conventional UI code against a fixed query layer."
 
+# Deliberately not premium despite being an open-ended web-traversal loop.
+# Unlike the runtime detect_source task, every claim this agent makes is
+# checked by a deterministic probe before it is recorded, so a wrong guess is
+# caught for free rather than becoming a silent bad source row. It is also the
+# highest-token subagent here -- long search-and-fetch loops -- which makes
+# premium expensive for no measurable gain in recall.
+[subagents.uk-data-scout]
+tier = "standard"
+rationale = "Open-ended discovery, but every candidate is verified by probe, so errors are cheap to catch."
+
 # --------------------------------------------------------------------------
 # Pricing, USD per million tokens. Update when Anthropic pricing changes.
 # --------------------------------------------------------------------------
