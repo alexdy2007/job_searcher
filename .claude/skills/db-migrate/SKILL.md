@@ -34,6 +34,11 @@ uv run alembic downgrade -1
 uv run alembic upgrade head
 ```
 
+CI enforces this on every push (`.github/workflows/ci.yml`): it runs a full
+`downgrade base`, then `scripts/check_no_leftover_enums.py`, then
+`upgrade head`. If you add a new native enum, add its name to `NATIVE_ENUMS`
+in that script or the check will not cover it.
+
 ## What autogenerate never emits
 
 Add these by hand, every time:
