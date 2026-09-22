@@ -40,6 +40,11 @@ cost ledger and to the eval.
 `scripts/sync_model_policy.py` propagates subagent tiers into agent
 frontmatter; CI fails on drift.
 
+Every subagent run appends its token usage to `cost/<agent_type>.csv` via the
+`SubagentStop` hook in `.claude/settings.json`. Main-thread work has no such
+event and is never recorded — another reason to delegate rather than do a
+subagent's job inline. See `cost/README.md`.
+
 Changing a runtime tier is a quality decision. Justify it with
 `uv run pytest --llm tests/eval/` before and after — a saving is not a reason
 on its own.

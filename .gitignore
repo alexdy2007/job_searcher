@@ -51,11 +51,15 @@ test-results/
 playwright-report/
 
 # --- tooling -------------------------------------------------------------
-# The shared .claude/agents and .claude/skills are deliberately tracked.
-# These are per-machine or scratch, and are not.
+# The shared .claude/agents, .claude/skills and .claude/settings.json are
+# deliberately tracked. These are per-machine or scratch, and are not.
 .claude/settings.local.json
 .claude/plan/
 .ai/
+
+# Per-machine subagent token telemetry, appended by the SubagentStop hook.
+# The README documenting the format is tracked; the data is not.
+cost/*.csv
 
 *.log
 

@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && uv run python scripts/log_subagent_cost.py",
+            "async": true,
+            "timeout": 30,
+            "statusMessage": "Recording subagent token usage"
+          }
+        ]
+      }
+    ]
+  }
+}
