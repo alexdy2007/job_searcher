@@ -49,6 +49,13 @@ jobs:
       - name: Lint
         run: uv run ruff check .
 
+      # config/model_policy.toml is canonical for which model each subagent
+      # runs on. Without this check it would drift from the frontmatter that
+      # actually runs, and an agent silently falling back to the default model
+      # is an invisible cost increase.
+      - name: Check model policy matches agent frontmatter
+        run: uv run python scripts/sync_model_policy.py
+
       - name: Apply migrations
         run: uv run alembic upgrade head
 

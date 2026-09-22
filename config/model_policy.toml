@@ -1,0 +1,132 @@
+# Single source of truth for which model runs which task.
+#
+# Drives BOTH layers:
+#   * runtime_tasks  -> the model the application uses per LLM task
+#   * subagents      -> the model each .claude/agents/*.md runs on
+#
+# `scripts/sync_model_policy.py` propagates the subagent tiers into the agent
+# frontmatter and CI fails if the two drift, so this file stays canonical
+# rather than becoming documentation of what someone once intended.
+#
+# Changing a runtime tier is a quality decision, not a config tweak. Justify
+# it against `uv run pytest --llm tests/eval/` (see the extraction-eval skill)
+# before and after. Until that eval exists, the tiers below are deliberately
+# conservative.
+
+version = 1
+
+# --------------------------------------------------------------------------
+# Tiers
+#
+# Capability flags are not decoration. Haiku 4.5 returns a 400 if sent
+# output_config.effort, and it takes the older explicit thinking budget rather
+# than adaptive thinking. A router that treats tiers as interchangeable will
+# fail at runtime on exactly the tier meant to save money.
+# --------------------------------------------------------------------------
+[tiers.cheap]
+api_model = "claude-haiku-4-5"
+claude_code_alias = "haiku"
+supports_effort = false
+supports_adaptive_thinking = false
+context_window = 200000
+rationale = "High-volume mechanical work where the schema does the constraining."
+
+[tiers.standard]
+api_model = "claude-sonnet-5"
+claude_code_alias = "sonnet"
+supports_effort = true
+supports_adaptive_thinking = true
+context_window = 1000000
+rationale = "Structured extraction from messy input; needs judgement, not depth."
+
+[tiers.premium]
+api_model = "claude-opus-5"
+claude_code_alias = "opus"
+supports_effort = true
+supports_adaptive_thinking = true
+context_window = 1000000
+rationale = "Open-ended reasoning, agentic loops, and anything where a wrong answer is expensive to undo."
+
+# --------------------------------------------------------------------------
+# Runtime tasks (the application's recurring cost)
+# --------------------------------------------------------------------------
+
+# The dominant cost at scale: one call per changed listing. Output is a fixed
+# Pydantic schema with Literal enums, so the schema carries the correctness
+# burden and the model only has to read carefully.
+[runtime_tasks.enrich_description]
+tier = "cheap"
+batch = true
+max_tokens = 2048
+rationale = "Highest volume, tightly schema-constrained. Batch API halves it again."
+
+# Parsing an arbitrary career page is genuinely harder than enrichment: the
+# input is unstructured and the failure mode (a hallucinated listing) is worse.
+[runtime_tasks.extract_html]
+tier = "standard"
+effort = "low"
+batch = false
+max_tokens = 4096
+rationale = "Unstructured input, and a wrong listing is worse than a missing one."
+
+# Pulling job links off an index page. Near-mechanical.
+[runtime_tasks.extract_job_links]
+tier = "cheap"
+batch = false
+max_tokens = 2048
+rationale = "Link extraction is pattern work; only reached when CSS heuristics fail."
+
+# The one real agentic loop: web search plus fetch to find a careers page and
+# identify its ATS. Runs once per company ever, so its cost is rounding error
+# and getting it right permanently moves a company onto the free ATS path.
+[runtime_tasks.detect_source]
+tier = "premium"
+effort = "high"
+batch = false
+max_tokens = 8192
+rationale = "Runs once per company; a correct answer removes that company's recurring LLM cost entirely."
+
+# --------------------------------------------------------------------------
+# Claude Code subagents (development cost)
+# --------------------------------------------------------------------------
+[subagents.source-onboarder]
+tier = "standard"
+rationale = "Pattern-matching board tokens out of messy HTML."
+
+[subagents.adapter-doctor]
+tier = "standard"
+rationale = "Diagnosis from a known failure-mode table rather than open-ended debugging."
+
+[subagents.schema-migrator]
+tier = "premium"
+rationale = "Migrations are hard to reverse and can destroy scraped history."
+
+[subagents.extraction-tuner]
+tier = "premium"
+rationale = "Prompt and schema judgement; the thing every runtime cost decision is measured against."
+
+[subagents.streamlit-builder]
+tier = "standard"
+rationale = "Conventional UI code against a fixed query layer."
+
+# --------------------------------------------------------------------------
+# Pricing, USD per million tokens. Update when Anthropic pricing changes.
+# --------------------------------------------------------------------------
+[pricing.claude-opus-5]
+input = 5.00
+output = 25.00
+
+[pricing.claude-sonnet-5]
+input = 2.00
+output = 10.00
+
+[pricing.claude-haiku-4-5]
+input = 1.00
+output = 5.00
+
+[multipliers]
+# Cache reads bill at a fraction of input; cache writes at a premium.
+cache_read = 0.1
+cache_write = 1.25
+# Batch API is half price on all token usage.
+batch = 0.5

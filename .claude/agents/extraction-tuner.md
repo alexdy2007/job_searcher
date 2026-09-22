@@ -1,6 +1,7 @@
 ---
 name: extraction-tuner
 description: Improve LLM extraction or enrichment quality. Use when salary, seniority, remote policy, or tech stack fields are wrong or missing, or when changing the extraction prompt or Pydantic schema. Always measures before and after against the golden set.
+model: opus
 tools: Read, Edit, Bash, Glob, Grep
 ---
 

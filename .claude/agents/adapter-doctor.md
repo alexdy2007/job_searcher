@@ -1,6 +1,7 @@
 ---
 name: adapter-doctor
 description: Diagnose a failing or suspect job source. Use when scrape_run_sources shows a source as failed or suspect_drift, when a source suddenly returns zero jobs, or when extracted fields have gone null. Finds the root cause and proposes the minimal fix.
+model: sonnet
 tools: Read, Edit, Bash, Glob, Grep, WebFetch
 ---
 

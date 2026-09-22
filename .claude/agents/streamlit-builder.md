@@ -1,6 +1,7 @@
 ---
 name: streamlit-builder
 description: Build or change the Streamlit UI in app/. Use for adding pages, filters, search, or charts to the job browser. Enforces the query-layer separation and the caching rules that keep the app fast.
+model: sonnet
 tools: Read, Write, Edit, Bash, Glob, Grep
 ---
 

@@ -1,6 +1,7 @@
 ---
 name: source-onboarder
 description: Onboard a new company as a job source. Use when given a company name or careers URL and asked to add it to the sources table. Identifies which ATS backs the page, extracts the board token, adds the source row, and verifies it returns listings.
+model: sonnet
 tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 ---
 

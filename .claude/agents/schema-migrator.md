@@ -1,6 +1,7 @@
 ---
 name: schema-migrator
 description: Change the database schema. Use for any edit to db/models.py, adding or altering columns, indexes, or constraints, and for writing and applying Alembic migrations. Handles the Postgres-specific traps that autogenerate silently gets wrong.
+model: opus
 tools: Read, Edit, Bash, Glob, Grep
 ---
 
