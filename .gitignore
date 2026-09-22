@@ -51,9 +51,10 @@ test-results/
 playwright-report/
 
 # --- tooling -------------------------------------------------------------
-# Personal permission overrides. The shared .claude/agents and
-# .claude/skills are deliberately tracked; this file is per-machine.
+# The shared .claude/agents and .claude/skills are deliberately tracked.
+# These are per-machine or scratch, and are not.
 .claude/settings.local.json
+.claude/plan/
 .ai/
 
 *.log
