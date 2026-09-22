@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: job_searcher
+          POSTGRES_PASSWORD: job_searcher
+          POSTGRES_DB: job_searcher
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U job_searcher -d job_searcher"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # The service container maps to 5432 here. docker-compose uses 5433
+      # locally only to avoid clashing with a native Postgres install, so the
+      # URL cannot be shared between the two.
+      DATABASE_URL: postgresql+psycopg://job_searcher:job_searcher@localhost:5432/job_searcher
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Apply migrations
+        run: uv run alembic upgrade head
+
+      # Proves the migration is reversible. Dropping a table does not drop the
+      # native enum types it used, so a downgrade/upgrade cycle fails with
+      # "type already exists" unless the downgrade drops them explicitly.
+      - name: Verify migrations are reversible
+        run: |
+          uv run alembic downgrade base
+          uv run python scripts/check_no_leftover_enums.py
+          uv run alembic upgrade head
+
+      # Catches "changed the model, forgot the migration". The --llm eval tests
+      # are excluded by default and never run here: they cost real money and
+      # need an API key.
+      - name: Test
+        run: uv run pytest -q

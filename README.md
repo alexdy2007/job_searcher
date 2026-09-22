@@ -1,5 +1,7 @@
 # job-searcher
 
+[![CI](https://github.com/alexdy2007/job_searcher/actions/workflows/ci.yml/badge.svg)](https://github.com/alexdy2007/job_searcher/actions/workflows/ci.yml)
+
 Collects job listings from ATS boards (Greenhouse, Lever, Ashby, Workable) and
 company career pages, normalizes them into Postgres, and serves them through a
 Streamlit UI for search and filtering.
